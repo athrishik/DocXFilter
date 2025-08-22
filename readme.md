@@ -267,4 +267,7 @@ This software is proprietary and confidential. Unauthorized copying, distributio
 
 ---
 
-For support or feature requests, please contact the development team.
+For support or feature requests, please contact the developer.
+Hrishik Kunduru
+hkunduru@raslg.com
+[https://hrishik](https://hrishik.netlify.app/)

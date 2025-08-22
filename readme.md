@@ -8,7 +8,7 @@
 
 DocXFilter is a professional-grade document analysis application that enables powerful search capabilities across large document collections. Built specifically for processing DocXScan Excel outputs, it provides multi-pattern search, token management, and comprehensive analytics.
 
-![DocXFilter Interface](https://via.placeholder.com/800x400/2c3e50/ffffff?text=DocXFilter+v2.1)
+![DocXFilter Interface](https://docxfilter.streamlit.app/)
 
 ## ✨ Key Features
 

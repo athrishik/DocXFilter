@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-DocXFilter v2.1 - Advanced Document Search & Analytics
+DocXFilter v2.2 - Advanced Document Search & Analytics
 Copyright 2025 Hrishik Kunduru. All rights reserved.
 
 Professional multi-pattern search and analytics tool for DocXScan Excel outputs.
@@ -30,7 +30,6 @@ st.set_page_config(
 # Enhanced CSS styling with professional colors
 st.markdown("""
 <style>
-    /* Main header - subtle professional gradient */
     .main-header {
         background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
         padding: 2rem;
@@ -41,7 +40,6 @@ st.markdown("""
         box-shadow: 0 4px 20px rgba(44, 62, 80, 0.3);
     }
     
-    /* Professional metric cards */
     .metric-container {
         background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
         padding: 1.2rem;
@@ -53,7 +51,6 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    /* Token cards - professional styling */
     .token-card-selected {
         background: #e8f5e8;
         border: 2px solid #27ae60;
@@ -79,7 +76,6 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(52, 152, 219, 0.15);
     }
     
-    /* Search section styling */
     .search-section {
         background: #f8f9fa;
         padding: 1.5rem;
@@ -89,7 +85,6 @@ st.markdown("""
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
     
-    /* Results header - more subtle */
     .results-header {
         background: #ecf0f1;
         padding: 1rem;
@@ -100,7 +95,6 @@ st.markdown("""
         border-left: 4px solid #e74c3c;
     }
     
-    /* Professional tab styling with clear active state */
     .stTabs [data-baseweb="tab-list"] { 
         gap: 2px;
         background: #ecf0f1;
@@ -120,7 +114,6 @@ st.markdown("""
         transition: all 0.2s ease;
     }
     
-    /* Clear active tab indicator */
     .stTabs [data-baseweb="tab"][aria-selected="true"] {
         background: #3498db !important;
         color: white !important;
@@ -135,7 +128,6 @@ st.markdown("""
         color: #2c3e50;
     }
     
-    /* Professional buttons */
     .stButton > button {
         border-radius: 4px;
         border: 1px solid #bdc3c7;
@@ -147,7 +139,6 @@ st.markdown("""
         color: #3498db;
     }
     
-    /* Info boxes */
     .info-box {
         background: #e8f4fd;
         border: 1px solid #3498db;
@@ -173,16 +164,6 @@ st.markdown("""
         padding: 1rem;
         margin: 1rem 0;
         color: #2c3e50;
-    }
-    
-    /* Sidebar styling */
-    .css-1d391kg {
-        background-color: #f8f9fa;
-    }
-    
-    /* Main content area */
-    .main .block-container {
-        background-color: white;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -218,7 +199,6 @@ class DocumentSearchEngine:
         if _self.df is None: 
             return {}
         
-        # Optimized pattern compilation
         patterns = [
             re.compile(r'<<[^>]+>>', re.IGNORECASE),
             re.compile(r'<<[^>]+\.', re.IGNORECASE),
@@ -230,7 +210,6 @@ class DocumentSearchEngine:
         
         all_tokens = defaultdict(lambda: {'count': 0, 'documents': set()})
         
-        # Vectorized processing
         for _, row in _self.df.iterrows():
             content = str(row['Full Contents'])
             file_name = row['File Name']
@@ -241,7 +220,6 @@ class DocumentSearchEngine:
                     all_tokens[token]['count'] += 1
                     all_tokens[token]['documents'].add(file_name)
         
-        # Convert to final format
         result = {
             token: {
                 'count': data['count'],
@@ -326,25 +304,22 @@ def init_session_state():
 def main():
     init_session_state()
     
-    # Header with enhanced styling
+    # Header
     st.markdown("""
     <div class="main-header">
-        <h1>🔍 DocXFilter v2.1</h1>
+        <h1>🔍 DocXFilter v2.2</h1>
         <p>Advanced multi-pattern search and analytics for DocXScan outputs</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Sidebar for file uploads
+    # Sidebar
     with st.sidebar:
         st.header("📁 Data Import")
-        
         uploaded_excel = st.file_uploader("DocXScan Excel File", type=['xlsx', 'xls'])
         uploaded_tokens = st.file_uploader("Token Definitions (JSON)", type=['json'])
         
-        # Handle file uploads
         handle_file_uploads(uploaded_excel, uploaded_tokens)
         
-        # Reset button
         if st.session_state.data_loaded:
             st.markdown("---")
             if st.button("🔄 Reset & Load New Files", type="secondary"):
@@ -358,7 +333,6 @@ def main():
 
 def handle_file_uploads(uploaded_excel, uploaded_tokens):
     """Handle file upload logic"""
-    # Excel file upload
     if uploaded_excel and not st.session_state.data_loaded:
         try:
             df = pd.read_excel(uploaded_excel, engine='openpyxl')
@@ -366,11 +340,9 @@ def handle_file_uploads(uploaded_excel, uploaded_tokens):
                 st.session_state.data_loaded = True
                 st.success(f"✅ Loaded {len(df)} documents")
                 
-                # Load tokens if provided
                 if uploaded_tokens:
                     load_tokens(uploaded_tokens)
                 
-                # Discover patterns
                 with st.spinner("🔍 Discovering patterns..."):
                     st.session_state.search_engine.discover_tokens()
                 
@@ -378,7 +350,6 @@ def handle_file_uploads(uploaded_excel, uploaded_tokens):
         except Exception as e:
             st.error(f"❌ Error loading Excel file: {e}")
     
-    # Token file upload for existing sessions
     if uploaded_tokens and st.session_state.data_loaded and not st.session_state.tokens_loaded:
         load_tokens(uploaded_tokens)
 
@@ -391,10 +362,10 @@ def load_tokens(uploaded_tokens):
         st.session_state.tokens_loaded = True
         st.success(f"✅ Loaded {len(token_json)} token definitions")
         
-        # Show sample tokens
         if token_json:
             sample_tokens = list(token_json.items())[:3]
-            st.info(f"📋 Sample: {', '.join([f'`{k}`' for k, v in sample_tokens])}")
+            sample_display = ', '.join([f'`{k}`' for k, v in sample_tokens])
+            st.info(f"📋 Sample: {sample_display}")
         st.rerun()
     except Exception as e:
         st.error(f"❌ Error loading tokens: {e}")
@@ -435,7 +406,7 @@ def show_main_interface():
     """Main interface with enhanced metrics"""
     engine = st.session_state.search_engine
     
-    # Enhanced metrics display
+    # Metrics display
     col1, col2, col3, col4 = st.columns(4)
     metrics = [
         ("📄", "Documents", len(engine.df) if engine.df is not None else 0),
@@ -456,7 +427,7 @@ def show_main_interface():
     
     st.markdown("---")
     
-    # Enhanced tabs
+    # Tabs
     tab1, tab2, tab3 = st.tabs(["🔍 Search", "📊 Analytics", "📤 Export"])
     
     with tab1: 
@@ -490,12 +461,13 @@ def show_search_interface():
         if st.button("🧹 Clear All", use_container_width=True):
             clear_all_terms()
     
-    # Token selection from file
+    # Token selection
     show_token_selection()
     
-    # Current search terms and mode
+    # Current search terms
     if st.session_state.search_terms:
         show_current_search()
+        show_search_results_summary()
     else:
         st.info("💡 Add search terms above or use 'Add Tokens from File' to start searching.")
     
@@ -525,7 +497,7 @@ def clear_all_terms():
     st.rerun()
 
 def show_token_selection():
-    """Enhanced token selection interface"""
+    """Token selection interface"""
     engine = st.session_state.search_engine
     imported_tokens = engine.token_map
     discovered_tokens = engine.discovered_tokens
@@ -577,9 +549,11 @@ def show_bulk_actions(filtered_tokens):
         st.markdown(f"**{len(filtered_tokens)} tokens found:**")
     with col2:
         if st.button("➕ Add All Visible", key="add_all_filtered"):
-            added_count = sum(1 for token in filtered_tokens.keys() 
-                            if token not in st.session_state.search_terms 
-                            and not st.session_state.search_terms.append(token))
+            added_count = 0
+            for token in filtered_tokens.keys():
+                if token not in st.session_state.search_terms:
+                    st.session_state.search_terms.append(token)
+                    added_count += 1
             if added_count > 0:
                 st.success(f"Added {added_count} tokens!")
                 st.rerun()
@@ -676,12 +650,13 @@ def show_current_search():
         if st.button("🔍 Search Now", type="primary", use_container_width=True):
             perform_multi_search()
     
-    # Display active terms
+    # Display active terms without HTML
     st.markdown("**Active Search Terms:**")
     for i, term in enumerate(st.session_state.search_terms):
         col1, col2 = st.columns([6, 1])
         with col1:
-            st.markdown(f"🔍 `{term}`")
+            # Use st.code to safely display any characters
+            st.code(term, language=None)
         with col2:
             if st.button("❌", key=f"remove_term_{i}", help=f"Remove '{term}'"):
                 st.session_state.search_terms.pop(i)
@@ -693,6 +668,29 @@ def show_current_search():
     if key != st.session_state.current_search_key:
         perform_multi_search()
 
+def show_search_results_summary():
+    """Show search results summary without HTML rendering"""
+    if not st.session_state.current_results.empty:
+        results_count = len(st.session_state.current_results)
+        search_mode = st.session_state.search_mode
+        search_terms = st.session_state.search_terms
+        
+        st.success(f"✅ Found {results_count} documents ({search_mode} search)")
+        with st.expander("Search Details", expanded=False):
+            st.write("**Search Terms:**")
+            for term in search_terms:
+                st.code(term, language=None)
+            
+    elif st.session_state.search_terms and st.session_state.current_search_key:
+        search_mode = st.session_state.search_mode
+        search_terms = st.session_state.search_terms
+        
+        st.warning(f"⚠️ No documents found ({search_mode} search)")
+        with st.expander("Search Details", expanded=False):
+            st.write("**Search Terms:**")
+            for term in search_terms:
+                st.code(term, language=None)
+
 def perform_multi_search():
     """Execute multi-term search"""
     terms = st.session_state.search_terms
@@ -702,24 +700,16 @@ def perform_multi_search():
     result_df = engine.search_multi(terms, mode)
     st.session_state.current_results = result_df
     st.session_state.current_search_key = f"{mode}:{'|'.join(sorted(terms))}"
-    
-    if not result_df.empty:
-        st.success(f"✅ Found {len(result_df)} documents")
-    else:
-        st.warning(f"⚠️ No documents found for: {', '.join([f'`{t}`' for t in terms])}")
 
 def show_search_results():
-    """Enhanced search results display"""
+    """Enhanced search results display without HTML issues"""
     results = st.session_state.current_results
     search_terms = st.session_state.search_terms
     search_mode = st.session_state.search_mode
     
     st.markdown("---")
-    st.markdown(f"""
-    <div class="results-header">
-        📋 Results ({len(results)} documents) - {search_mode} search for: {', '.join([f'`{t}`' for t in search_terms])}
-    </div>
-    """, unsafe_allow_html=True)
+    st.subheader(f"📋 Results ({len(results)} documents)")
+    st.write(f"**Search Mode:** {search_mode}")
     
     # Export button
     col1, col2 = st.columns([3, 1])
@@ -731,7 +721,7 @@ def show_search_results():
                 "💾 Download Excel", data=export_data, file_name=filename,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     
-    # Results table with match summary
+    # Results table
     display_results_table(results, search_terms)
     
     # Document preview
@@ -766,7 +756,7 @@ def display_results_table(results, search_terms):
         )
 
 def show_document_preview(results, search_terms):
-    """Enhanced document preview"""
+    """Enhanced document preview without HTML issues"""
     st.subheader("📖 Document Preview")
     selected_doc = st.selectbox(
         "Select document to preview:", results['File Name'].tolist(),
@@ -787,118 +777,154 @@ def show_document_preview(results, search_terms):
                 st.write("**🔍 Term Occurrences:**")
                 for term in search_terms:
                     count = content.lower().count(term.lower())
-                    st.write(f"• `{term}`: {count} times")
+                    st.write(f"• {count} times")
+                    st.code(term, language=None)
             
             # Context preview
             show_context_preview(engine, selected_doc, search_terms)
             
-            # Full document with highlights
-            show_highlighted_document(content, search_terms)
+            # Full document content
+            show_document_content(content, search_terms)
 
 def show_context_preview(engine, doc_name, search_terms):
-    """Show context preview for each term"""
+    """Show context preview without HTML rendering issues"""
     st.write("**📋 Context Preview for Each Term:**")
     
     for i, term in enumerate(search_terms):
-        with st.expander(f"🔍 Contexts for '{term}'", expanded=(i == 0)):
+        with st.expander(f"🔍 Contexts for term {i+1}", expanded=(i == 0)):
+            st.code(term, language=None)
+            
             contexts = engine.get_contexts(term, doc_name)
             
             if contexts:
-                colors = ['#ffd700', '#ffb3ba', '#bae1ff', '#baffc9', '#ffffba']
-                
                 for j, context in enumerate(contexts, 1):
-                    highlighted = context
-                    for k, highlight_term in enumerate(search_terms):
-                        color = colors[k % len(colors)]
-                        highlighted = re.sub(
-                            re.escape(highlight_term),
-                            f'<span style="background-color: {color}; padding: 2px 4px; border-radius: 3px; font-weight: bold;">{highlight_term}</span>',
-                            highlighted, flags=re.IGNORECASE
-                        )
-                    
-                    st.markdown(
-                        f'**Context {j}:** <div style="background: #f8f9fa; padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0; border-left: 3px solid #667eea;">{highlighted}</div>',
-                        unsafe_allow_html=True
-                    )
+                    st.write(f"**Context {j}:**")
+                    # Highlight the term in the context using text highlighting
+                    lines = context.split('\n')
+                    for line in lines:
+                        if term.lower() in line.lower():
+                            st.info(line.strip())
+                        else:
+                            st.write(line.strip())
+                    st.markdown("---")
             else:
-                st.write(f"No contexts found for '{term}' in this document.")
+                st.write("No contexts found for this term in this document.")
 
-def show_highlighted_document(content, search_terms):
-    """Show full document with highlighted terms"""
-    st.markdown("#### 📝 Full Document Content (Highlighted)")
+def show_document_content(content, search_terms):
+    """Show full document content safely"""
+    st.markdown("#### 📝 Full Document Content")
     
-    colors = ['#ffd700', '#ffb3ba', '#bae1ff', '#baffc9', '#ffffba']
-    highlighted_content = content
-    
-    # Highlight terms (longer terms first to avoid conflicts)
-    for i, term in sorted(enumerate(search_terms), key=lambda x: -len(x[1])):
-        color = colors[i % len(colors)]
-        highlighted_content = re.sub(
-            re.escape(term),
-            f'<span style="background-color: {color}; padding:2px 4px; border-radius:3px; font-weight:bold;">{term}</span>',
-            highlighted_content, flags=re.IGNORECASE
-        )
-    
-    st.markdown(
-        f"""
-        <div style="
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid #dee2e6;
-            max-height: 600px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        ">
-            {highlighted_content}
-        </div>
-        """,
-        unsafe_allow_html=True
+    # Use text area for safe display of any content
+    st.text_area(
+        "Document content (use Ctrl+F to search for terms)",
+        value=content,
+        height=400,
+        help="Use your browser's search (Ctrl+F) to find specific terms in this content"
     )
+    
+    # Show search term summary
+    if search_terms:
+        st.write("**Search Terms in this document:**")
+        for i, term in enumerate(search_terms, 1):
+            count = content.lower().count(term.lower())
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.code(term, language=None)
+            with col2:
+                st.metric("Occurrences", count)
 
-@st.cache_data
 def create_enhanced_export(results_df: pd.DataFrame, search_terms: List[str], search_mode: str) -> bytes:
-    """Create enhanced Excel export"""
+    """Create enhanced Excel export with error handling"""
     output = io.BytesIO()
     
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        export_df = results_df.copy()
+    try:
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            if results_df.empty:
+                # Create summary sheet for no results
+                summary_data = {
+                    'Search Mode': [search_mode],
+                    'Search Terms': [' | '.join(search_terms) if search_terms else 'None'],
+                    'Results Found': [0],
+                    'Export Date': [datetime.now().strftime('%Y-%m-%d %H:%M:%S')],
+                    'Generated By': ['DocXFilter 'v2.2],
+                    'Note': ['No documents found matching search criteria']
+                }
+                summary_df = pd.DataFrame(summary_data)
+                summary_df.to_excel(writer, sheet_name='Search Summary', index=False)
+                
+                # Create empty results sheet
+                empty_results = pd.DataFrame({'File Name': [], 'Note': []})
+                empty_results.to_excel(writer, sheet_name='Search Results', index=False)
+            else:
+                # Create results sheet with data
+                export_df = results_df.copy()
+                
+                # Add match columns safely
+                try:
+                    for term in search_terms:
+                        if 'Full Contents' in export_df.columns:
+                            export_df[f"'{term}' Count"] = export_df['Full Contents'].str.lower().str.count(term.lower())
+                        else:
+                            export_df[f"'{term}' Count"] = 0
+                    
+                    if search_terms and 'Full Contents' in export_df.columns:
+                        export_df['Total Matches'] = sum([export_df[f"'{term}' Count"] for term in search_terms])
+                    else:
+                        export_df['Total Matches'] = 0
+                        
+                except Exception:
+                    pass
+                
+                # Determine export columns
+                basic_cols = ['File Name']
+                optional_cols = ['Size (KB)', 'Content Length (chars)']
+                match_cols = [f"'{term}' Count" for term in search_terms if f"'{term}' Count" in export_df.columns]
+                
+                export_cols = basic_cols + [col for col in optional_cols if col in export_df.columns] + match_cols
+                if 'Total Matches' in export_df.columns:
+                    export_cols.append('Total Matches')
+                
+                # Export main results
+                export_df[export_cols].to_excel(writer, sheet_name='Search Results', index=False)
+                
+                # Create summary sheet
+                summary_data = {
+                    'Search Mode': [search_mode],
+                    'Search Terms': [' | '.join(search_terms) if search_terms else 'None'],
+                    'Number of Terms': [len(search_terms)],
+                    'Results Found': [len(results_df)],
+                    'Export Date': [datetime.now().strftime('%Y-%m-%d %H:%M:%S')],
+                    'Generated By': ['DocXFilter v2.2']
+                }
+                
+                # Add individual terms
+                for i, term in enumerate(search_terms, 1):
+                    summary_data[f'Term {i}'] = [term]
+                
+                summary_df = pd.DataFrame(summary_data)
+                summary_df.to_excel(writer, sheet_name='Search Summary', index=False)
         
-        # Add match columns
-        for term in search_terms:
-            export_df[f"'{term}' Count"] = export_df['Full Contents'].str.lower().str.count(term.lower())
+        output.seek(0)
+        return output.read()
         
-        export_df['Total Matches'] = sum([export_df[f"'{term}' Count"] for term in search_terms])
+    except Exception as e:
+        st.error(f"Export error: {e}")
         
-        # Export columns
-        export_cols = ['File Name', 'Size (KB)', 'Content Length (chars)'] + \
-                     [f"'{term}' Count" for term in search_terms] + ['Total Matches']
-        export_cols = [col for col in export_cols if col in export_df.columns]
+        # Fallback: create simple error report
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            error_data = {
+                'Export Status': ['Error'],
+                'Error Message': [str(e)],
+                'Search Terms': [' | '.join(search_terms) if search_terms else 'None'],
+                'Results Count': [len(results_df) if not results_df.empty else 0],
+                'Export Date': [datetime.now().strftime('%Y-%m-%d %H:%M:%S')]
+            }
+            error_df = pd.DataFrame(error_data)
+            error_df.to_excel(writer, sheet_name='Export Error', index=False)
         
-        export_df[export_cols].to_excel(writer, sheet_name='Search Results', index=False)
-        
-        # Summary sheet
-        summary_data = {
-            'Search Mode': [search_mode],
-            'Search Terms': [' | '.join(search_terms)],
-            'Number of Terms': [len(search_terms)],
-            'Results Found': [len(results_df)],
-            'Export Date': [datetime.now().strftime('%Y-%m-%d %H:%M:%S')],
-            'Generated By': ['DocXFilter v2.1']
-        }
-        
-        for i, term in enumerate(search_terms, 1):
-            summary_data[f'Term {i}'] = [term]
-        
-        summary_df = pd.DataFrame(summary_data)
-        summary_df.to_excel(writer, sheet_name='Search Summary', index=False)
-    
-    output.seek(0)
-    return output.read()
+        output.seek(0)
+        return output.read()
 
 def show_analytics_interface():
     """Enhanced analytics interface"""
@@ -917,11 +943,11 @@ def show_analytics_interface():
         show_pattern_insights(engine)
 
 def show_document_overview(engine):
-    """Enhanced document overview with professional styling"""
+    """Enhanced document overview"""
     st.markdown("### 📄 Document Collection Overview")
     df = engine.df
     
-    # Key metrics with enhanced styling
+    # Key metrics
     col1, col2, col3, col4 = st.columns(4)
     content_lengths = df['Full Contents'].str.len()
     
@@ -960,7 +986,7 @@ def show_document_overview(engine):
                 nbins=25, 
                 title='📦 Document Size Distribution',
                 labels={'x': 'File Size (KB)', 'y': 'Number of Documents'},
-                color_discrete_sequence=['#667eea']
+                color_discrete_sequence=['#3498db']
             )
             fig.update_layout(height=400, showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
@@ -973,7 +999,7 @@ def show_document_overview(engine):
             nbins=25,
             title='📝 Content Length Distribution',
             labels={'x': 'Content Length (characters)', 'y': 'Number of Documents'},
-            color_discrete_sequence=['#764ba2']
+            color_discrete_sequence=['#2980b9']
         )
         fig.update_layout(height=400, showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
@@ -1065,7 +1091,7 @@ def show_pattern_insights(engine):
     
     col1, col2 = st.columns(2)
     
-    # Imported tokens performance
+    # Imported tokens
     with col1:
         st.markdown("#### 🏷️ Imported Tokens")
         if imported_tokens:
@@ -1099,7 +1125,7 @@ def show_pattern_insights(engine):
         else:
             st.info("No patterns discovered.")
     
-    # Combined visualization
+    # Visualization
     if discovered_tokens:
         st.markdown("#### 📊 Pattern Distribution")
         analytics_data = [
@@ -1123,7 +1149,7 @@ def show_pattern_insights(engine):
                 hover_data=['Pattern'],
                 title='Top 20 Patterns: Document Count vs Total Occurrences',
                 labels={'Documents': 'Number of Documents', 'Total Occurrences': 'Total Occurrences'},
-                color_discrete_sequence=['#667eea', '#764ba2']
+                color_discrete_sequence=['#3498db', '#2980b9']
             )
             fig.update_layout(height=400)
             st.plotly_chart(fig, use_container_width=True)
@@ -1149,28 +1175,42 @@ def show_export_interface():
     <div class="success-box">
         <h4>📊 Export Summary</h4>
         <p><strong>Results:</strong> {len(results)} documents found</p>
-        <p><strong>Search Terms:</strong> {', '.join([f'`{term}`' for term in search_terms])}</p>
         <p><strong>Search Mode:</strong> {search_mode}</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Export button
+    # Show search terms safely
+    st.write("**Search Terms:**")
+    for term in search_terms:
+        st.code(term, language=None)
+    
+    # Export button with error handling
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         if st.button("📊 Generate Excel Export", type="primary", use_container_width=True):
-            export_data = create_enhanced_export(results, search_terms, search_mode)
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"docxfilter_export_{timestamp}.xlsx"
-            
-            st.download_button(
-                "💾 Download Excel Report",
-                data=export_data,
-                file_name=filename,
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
-            )
-            
-            st.success("✅ Export ready for download!")
+            try:
+                with st.spinner("Generating Excel export..."):
+                    export_data = create_enhanced_export(results, search_terms, search_mode)
+                    
+                if export_data:
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    filename = f"docxfilter_export_{timestamp}.xlsx"
+                    
+                    st.download_button(
+                        "💾 Download Excel Report",
+                        data=export_data,
+                        file_name=filename,
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True
+                    )
+                    
+                    st.success("✅ Export ready for download!")
+                else:
+                    st.error("❌ Failed to generate export. Please try again.")
+                    
+            except Exception as e:
+                st.error(f"❌ Export failed: {str(e)}")
+                st.info("💡 Try reducing the number of search results or check your data.")
 
 if __name__ == "__main__":
     main()
